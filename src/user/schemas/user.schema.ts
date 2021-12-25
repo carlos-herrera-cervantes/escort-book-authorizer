@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { Role } from '../enums/roles.enum';
+import { HashingService } from '../../hashing/hashing.service';
 
 export type UserDocument = User & Document;
 
@@ -18,6 +19,9 @@ export class User {
   @Prop({ default: [ Role.Viewer ] })
   roles: Role[];
 
+  @Prop({ default: false })
+  verified: boolean;
+
   @Prop({ default: new Date().toUTCString() })
   createdAt: Date;
 
@@ -28,12 +32,18 @@ export class User {
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-UserSchema.pre('save', function (next) {
-  if (this.isNew) {
-    console.info('IS NEW');
+UserSchema.pre<UserDocument>('save', async function () {
+  const hashingService = new HashingService();
+
+  if (!this.isNew) {
+    this.updateAt = new Date();
   }
 
-  console.info('IS NOT NEW');
+  if (this.password) {
+    this.password = await hashingService.hashAsync(this.password);
+  }
+});
 
-  next();
+UserSchema.post<UserDocument>('save', function (doc) {
+  this.password = null;
 });

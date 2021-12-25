@@ -22,4 +22,8 @@ export class AccessTokenService {
     await this.productModel.findOneAndDelete({ token });
   }
 
+  async deleteManyAsync(filter?: any): Promise<void> {
+    await this.productModel.deleteMany(filter);
+  }
+
 }
