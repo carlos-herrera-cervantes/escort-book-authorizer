@@ -15,12 +15,12 @@ export class UserService {
     return this.userModel.findOne(filter).lean();
   }
 
-  async createAsync(dto: CreateUserDto): Promise<User> {
-    return this.userModel.create(dto);
+  async createAsync(user: CreateUserDto): Promise<User> {
+    return this.userModel.create(user);
   }
 
-  async updateOnePartialAsync(filter: any, dto: UpdateUserDto): Promise<User> {
-    return this.userModel.findOneAndUpdate(filter, { $set: dto }, { new: true });
+  async updateOnePartialAsync(filter: any, user: UpdateUserDto): Promise<User> {
+    return this.userModel.findOneAndUpdate(filter, { $set: user }, { new: true });
   }
 
 }

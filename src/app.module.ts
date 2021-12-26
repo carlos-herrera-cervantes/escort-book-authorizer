@@ -7,9 +7,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AccessTokenModule } from './access-token/access-token.module';
 import { HashingModule } from './hashing/hashing.module';
 import { UserModule } from './user/user.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],

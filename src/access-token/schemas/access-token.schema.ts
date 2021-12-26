@@ -22,4 +22,4 @@ export class AccessToken {
 
 }
 
-export const UserSchema = SchemaFactory.createForClass(AccessToken);
+export const AccessTokenSchema = SchemaFactory.createForClass(AccessToken);
