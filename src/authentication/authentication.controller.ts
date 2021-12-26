@@ -51,6 +51,7 @@ export class AuthenticationController {
 
   @Post('/user/sign-up')
   async registerUserAsync(@Body() user: CreateUserDto): Promise<User> {
+    user.verified = true;
     return this.userService.createAsync(user);
   }
 
