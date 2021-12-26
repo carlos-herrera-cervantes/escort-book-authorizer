@@ -8,6 +8,7 @@ import { AccessTokenModule } from './access-token/access-token.module';
 import { HashingModule } from './hashing/hashing.module';
 import { UserModule } from './user/user.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { AwsModule } from './aws/aws.module';
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     AuthenticationModule,
     AccessTokenModule,
     HashingModule,
-    UserModule
+    UserModule,
+    AwsModule
   ],
   controllers: [AppController],
   providers: [AppService],

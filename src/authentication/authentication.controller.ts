@@ -1,17 +1,17 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Inject,
+  Param,
   Post,
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { Role } from '../user/enums/roles.enum';
 import { MessageResponseDto } from '../common/dto/message-response.dto';
 import { CreateUserDto } from '../user/dto/create-user.dto';
-import { UserService } from '../user/user.service';
 import { AuthenticationService } from './authentication.service';
 import { JwtResponseDto } from './dto/jwt-response.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -24,8 +24,12 @@ export class AuthenticationController {
   @Inject(AuthenticationService)
   private readonly authenticationService: AuthenticationService;
 
-  @Inject(UserService)
-  private readonly userService: UserService;
+  @Get('verification/customer/:verification_token')
+  async verifyCustomerAsync(
+    @Param('verification_token') verificationToken: string,
+  ): Promise<MessageResponseDto> {
+    return this.authenticationService.verifyCustomerAsync(verificationToken);
+  }
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
@@ -43,16 +47,12 @@ export class AuthenticationController {
 
   @Post('/customer/sign-up')
   async registerCustomerAsync(@Body() user: CreateUserDto): Promise<MessageResponseDto> {
-    user.roles = [Role.Customer];
-    await this.userService.createAsync(user);
-
-    return { message: 'A varification email was sent to you' };
+    return this.authenticationService.signUpCustomerAsync(user);
   }
 
   @Post('/user/sign-up')
   async registerUserAsync(@Body() user: CreateUserDto): Promise<User> {
-    user.verified = true;
-    return this.userService.createAsync(user);
+    return this.authenticationService.signUpUserAsync(user);
   }
 
 }
