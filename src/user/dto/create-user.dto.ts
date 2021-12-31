@@ -18,4 +18,8 @@ export class CreateUserDto {
   @IsOptional()
   @IsBoolean()
   verified?: boolean;
+
+  @IsOptional()
+  @IsString()
+  verificationToken?: string;
 }

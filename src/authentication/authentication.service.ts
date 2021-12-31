@@ -1,9 +1,13 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { HashingService } from '../hashing/hashing.service';
 import { UserService } from '../user/user.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Events } from '../common/enums/events.enum';
+import { User } from '../user/schemas/user.schema';
+import { CreateUserDto } from '../user/dto/create-user.dto';
+import { Role } from '../user/enums/roles.enum';
+import { MessageResponseDto } from '../common/dto/message-response.dto';
 
 @Injectable()
 export class AuthenticationService {
@@ -44,6 +48,37 @@ export class AuthenticationService {
     this.eventEmitter.emit(Events.UserLogin, token, user?.email);
 
     return token;
+  }
+
+  async signUpUserAsync(user: CreateUserDto): Promise<User> {
+    user.verified = true;
+    return this.userService.createAsync(user);
+  }
+
+  async signUpCustomerAsync(user: CreateUserDto): Promise<MessageResponseDto> {
+    user.roles = [Role.Customer];
+    user.verificationToken = await this.jwtService.signAsync({ user: user.email });
+    
+    await this.userService.createAsync(user);
+    this.eventEmitter.emit(Events.SignUp, user.email);
+
+    return { message: 'A varification email was sent to you' };
+  }
+
+  async verifyCustomerAsync(verificationToken: string): Promise<MessageResponseDto> {
+    const user = await this.userService.getOneAsync({ verificationToken });
+
+    if (!user) {
+      throw new ForbiddenException('Invalid customer');
+    }
+
+    this.jwtService.verifyAsync(verificationToken).catch(() => {
+      throw new BadRequestException('The verification token is not valid');
+    });
+
+    await this.userService.updateOnePartialAsync({ verificationToken }, { verified: true })
+
+    return { message: 'Successful verified customer' };
   }
 
 }

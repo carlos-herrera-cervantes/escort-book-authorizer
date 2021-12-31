@@ -1,4 +1,8 @@
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
+import { HashingService } from '../hashing/hashing.service';
+import { UserService } from '../user/user.service';
 import { AuthenticationService } from './authentication.service';
 
 describe('AuthenticationService', () => {
@@ -6,7 +10,25 @@ describe('AuthenticationService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthenticationService],
+      providers: [
+        AuthenticationService,
+        {
+          provide: UserService,
+          useValue: {},
+        },
+        {
+          provide: HashingService,
+          useValue: {},
+        },
+        {
+          provide: JwtService,
+          useValue: {},
+        },
+        {
+          provide: EventEmitter2,
+          useValue: {},
+        },
+      ],
     }).compile();
 
     service = module.get<AuthenticationService>(AuthenticationService);

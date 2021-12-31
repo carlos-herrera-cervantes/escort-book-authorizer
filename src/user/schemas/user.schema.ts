@@ -22,6 +22,9 @@ export class User {
   @Prop({ default: false })
   verified: boolean;
 
+  @Prop()
+  verificationToken: string;
+
   @Prop({ default: new Date().toUTCString() })
   createdAt: Date;
 
