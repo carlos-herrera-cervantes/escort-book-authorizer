@@ -19,9 +19,8 @@ export class UserAuthenticationListener {
     };
     const body = JSON.stringify({
       to: email,
-      from: '',
       subject: '',
-      html: '',
+      body: '',
     });
 
     await this.awsService.sendMessageAsync(messageAttributes, body);
