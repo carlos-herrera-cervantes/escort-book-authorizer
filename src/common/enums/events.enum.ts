@@ -3,4 +3,5 @@ export enum Events {
   UserLogout = 'user.logout',
   InvalidateSessions = 'invalidate.sessions',
   SignUp = 'sign.up',
+  DeleteUser = 'delete.user',
 }

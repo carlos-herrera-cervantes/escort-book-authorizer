@@ -8,6 +8,7 @@ import { User } from '../user/schemas/user.schema';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { Role } from '../user/enums/roles.enum';
 import { MessageResponseDto } from '../common/dto/message-response.dto';
+import * as http from 'https';
 
 @Injectable()
 export class AuthenticationService {
@@ -56,16 +57,18 @@ export class AuthenticationService {
   }
 
   async signUpCustomerAsync(user: CreateUserDto): Promise<MessageResponseDto> {
+    const verificationToken = await this.jwtService.signAsync({ user: user.email });
+    
     user.roles = [Role.Customer];
-    user.verificationToken = await this.jwtService.signAsync({ user: user.email });
+    user.verificationToken = verificationToken
     
     await this.userService.createAsync(user);
-    this.eventEmitter.emit(Events.SignUp, user.email);
+    this.eventEmitter.emit(Events.SignUp, user.email, verificationToken);
 
     return { message: 'A varification email was sent to you' };
   }
 
-  async verifyCustomerAsync(verificationToken: string): Promise<MessageResponseDto> {
+  async verifyCustomerAsync(verificationToken: string): Promise<void> {
     const user = await this.userService.getOneAsync({ verificationToken });
 
     if (!user) {
@@ -77,8 +80,20 @@ export class AuthenticationService {
     });
 
     await this.userService.updateOnePartialAsync({ verificationToken }, { verified: true })
+  }
 
-    return { message: 'Successful verified customer' };
+  async getSuccessTemplateAsync(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const request = http.get('', response => {
+        let data: string = '';
+
+        response.on('data', chunk => data += chunk);
+        response.on('end', () => resolve(data));
+      });
+  
+      request.on('error', error => reject(error));
+      request.end();
+    });
   }
 
 }

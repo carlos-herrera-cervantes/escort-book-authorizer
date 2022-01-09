@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { MessageResponseDto } from '../common/dto/message-response.dto';
@@ -17,6 +18,7 @@ import { JwtResponseDto } from './dto/jwt-response.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { User } from '../user/schemas/user.schema';
 import { RevokeJwtGuard } from '../access-token/guards/revoke-jwt.guard';
+import { Response } from 'express';
 
 @Controller('/api/v1/authentication')
 export class AuthenticationController {
@@ -26,9 +28,12 @@ export class AuthenticationController {
 
   @Get('verification/customer/:verification_token')
   async verifyCustomerAsync(
+    @Res() res: Response,
     @Param('verification_token') verificationToken: string,
-  ): Promise<MessageResponseDto> {
-    return this.authenticationService.verifyCustomerAsync(verificationToken);
+  ): Promise<any> {
+    await this.authenticationService.verifyCustomerAsync(verificationToken);
+    const template = await this.authenticationService.getSuccessTemplateAsync();
+    res.send(template);
   }
 
   @UseGuards(LocalAuthGuard)

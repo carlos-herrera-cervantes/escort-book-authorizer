@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -21,6 +21,10 @@ export class UserService {
 
   async updateOnePartialAsync(filter: any, user: UpdateUserDto): Promise<User> {
     return this.userModel.findOneAndUpdate(filter, { $set: user }, { new: true });
+  }
+
+  async deleteOneAsync(filter: FilterQuery<UserDocument>): Promise<void> {
+    await this.userModel.findOneAndDelete(filter);
   }
 
 }
