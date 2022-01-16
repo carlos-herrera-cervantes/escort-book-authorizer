@@ -1,6 +1,7 @@
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
+import { VaultService } from '../vault/vault.service';
 import { AccessTokenService } from '../access-token/access-token.service';
 import { HashingService } from '../hashing/hashing.service';
 import { UserService } from '../user/user.service';
@@ -32,6 +33,10 @@ describe('AuthenticationController', () => {
         },
         {
           provide: AccessTokenService,
+          useValue: {},
+        },
+        {
+          provide: VaultService,
           useValue: {},
         },
       ],

@@ -1,6 +1,7 @@
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
+import { VaultService } from '../vault/vault.service';
 import { HashingService } from '../hashing/hashing.service';
 import { UserService } from '../user/user.service';
 import { AuthenticationService } from './authentication.service';
@@ -26,6 +27,10 @@ describe('AuthenticationService', () => {
         },
         {
           provide: EventEmitter2,
+          useValue: {},
+        },
+        {
+          provide: VaultService,
           useValue: {},
         },
       ],
