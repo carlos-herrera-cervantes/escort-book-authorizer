@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { VaultService } from '../vault/vault.service';
 import { AwsService } from './aws.service';
 
 describe('AwsService', () => {
@@ -6,7 +7,13 @@ describe('AwsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AwsService],
+      providers: [
+        AwsService,
+        {
+          provide: VaultService,
+          useValue: {},
+        },
+      ],
     }).compile();
 
     service = module.get<AwsService>(AwsService);

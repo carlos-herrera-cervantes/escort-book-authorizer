@@ -4,6 +4,7 @@ import { Events } from '../../common/enums/events.enum';
 import { AwsService } from '../aws.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as http from 'https';
+import { VaultService } from '../../vault/vault.service';
 
 @Injectable()
 export class UserAuthenticationListener {
@@ -13,6 +14,9 @@ export class UserAuthenticationListener {
 
   @Inject(EventEmitter2)
   private readonly eventEmitter: EventEmitter2;
+
+  @Inject(VaultService)
+  private readonly vaultService: VaultService;
   
   @OnEvent(Events.SignUp, { async: true })
   async handleUserSignUp(email: string, verificationToken: string): Promise<void> {
@@ -23,14 +27,18 @@ export class UserAuthenticationListener {
       },
     };
 
-    const verificationUrl = `${verificationToken}`;
-
     try {
-      const welcomeTemplate = await this.readTemplate('');
+      const verificationEndpoint = await this.vaultService
+        .getSecretAsync('escort-book-verification-endpoint');
+      const verificationUrl = `${verificationEndpoint}/${verificationToken}`;
+
+      const welcomeTemplateUrl = await this.vaultService
+        .getSecretAsync('escort-book-welcome-template');
+      const welcomeTemplate = await this.readTemplate(welcomeTemplateUrl);
 
       const body = JSON.stringify({
         to: email,
-        subject: '',
+        subject: await this.vaultService.getSecretAsync('escort-book-welcome-subject'),
         body: welcomeTemplate.replace('{{placeholder}}', verificationUrl),
       });
 
