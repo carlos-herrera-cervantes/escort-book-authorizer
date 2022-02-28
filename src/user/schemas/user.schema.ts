@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { Role } from '../enums/roles.enum';
 import { HashingService } from '../../hashing/hashing.service';
+import { UserTypes } from '../enums/types.enum';
 
 export type UserDocument = User & Document;
 
@@ -24,6 +25,9 @@ export class User {
 
   @Prop()
   verificationToken: string;
+
+  @Prop({ default: UserTypes.Organization })
+  type: string;
 
   @Prop({ default: new Date().toUTCString() })
   createdAt: Date;

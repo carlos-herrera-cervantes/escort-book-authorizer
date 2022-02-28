@@ -19,6 +19,7 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { User } from '../user/schemas/user.schema';
 import { RevokeJwtGuard } from '../access-token/guards/revoke-jwt.guard';
 import { Response } from 'express';
+import { UserTypes } from '../user/enums/types.enum';
 
 @Controller('/api/v1/authentication')
 export class AuthenticationController {
@@ -52,7 +53,7 @@ export class AuthenticationController {
 
   @Post('/customer/sign-up')
   async registerCustomerAsync(@Body() user: CreateUserDto): Promise<MessageResponseDto> {
-    return this.authenticationService.signUpCustomerAsync(user);
+    return this.authenticationService.signUpCustomerAsync(user, UserTypes.Customer);
   }
 
   @Post('/user/sign-up')
@@ -60,4 +61,8 @@ export class AuthenticationController {
     return this.authenticationService.signUpUserAsync(user);
   }
 
+  @Post('/escort/sign-up')
+  async registerEscortAsync(@Body() user: CreateUserDto): Promise<MessageResponseDto> {
+    return this.authenticationService.signUpCustomerAsync(user, UserTypes.Escort);
+  }
 }

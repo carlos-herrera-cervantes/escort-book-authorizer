@@ -10,6 +10,7 @@ import { Role } from '../user/enums/roles.enum';
 import { MessageResponseDto } from '../common/dto/message-response.dto';
 import * as http from 'https';
 import { VaultService } from '../vault/vault.service';
+import { UserTypes } from '../user/enums/types.enum';
 
 @Injectable()
 export class AuthenticationService {
@@ -57,14 +58,16 @@ export class AuthenticationService {
 
   async signUpUserAsync(user: CreateUserDto): Promise<User> {
     user.verified = true;
+    user.type = UserTypes.Organization;
     return this.userService.createAsync(user);
   }
 
-  async signUpCustomerAsync(user: CreateUserDto): Promise<MessageResponseDto> {
+  async signUpCustomerAsync(user: CreateUserDto, userType: UserTypes): Promise<MessageResponseDto> {
     const verificationToken = await this.jwtService.signAsync({ user: user.email });
     
     user.roles = [Role.Customer];
     user.verificationToken = verificationToken
+    user.type = userType;
     
     await this.userService.createAsync(user);
     this.eventEmitter.emit(Events.SignUp, user.email, verificationToken);

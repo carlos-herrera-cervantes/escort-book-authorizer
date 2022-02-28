@@ -1,5 +1,6 @@
 import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Role } from '../enums/roles.enum';
+import { UserTypes } from '../enums/types.enum';
 
 export class CreateUserDto {
   @IsNotEmpty()
@@ -22,4 +23,9 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   verificationToken?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsEnum(UserTypes)
+  type: UserTypes;
 }
