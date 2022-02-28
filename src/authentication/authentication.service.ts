@@ -62,17 +62,20 @@ export class AuthenticationService {
     return this.userService.createAsync(user);
   }
 
-  async signUpCustomerAsync(user: CreateUserDto, userType: UserTypes): Promise<MessageResponseDto> {
+  async signUpCustomerAsync(
+    user: CreateUserDto,
+    userType: UserTypes,
+  ): Promise<[MessageResponseDto, User]> {
     const verificationToken = await this.jwtService.signAsync({ user: user.email });
     
     user.roles = [Role.Customer];
     user.verificationToken = verificationToken
     user.type = userType;
     
-    await this.userService.createAsync(user);
+    const created = await this.userService.createAsync(user);
     this.eventEmitter.emit(Events.SignUp, user.email, verificationToken);
 
-    return { message: 'A varification email was sent to you' };
+    return [{ message: 'A varification email was sent to you' }, created];
   }
 
   async verifyCustomerAsync(verificationToken: string): Promise<void> {
