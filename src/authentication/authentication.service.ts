@@ -47,7 +47,7 @@ export class AuthenticationService {
   }
 
   async loginAsync(user: any): Promise<string> {
-    const payload = { email: user?.email, roles: user?.roles };
+    const payload = { email: user?.email, roles: user?.roles, id: user?._id };
     const token = await this.jwtService.signAsync(payload);
 
     this.eventEmitter.emit(Events.InvalidateSessions, user?.email);
