@@ -5,6 +5,9 @@ import { AwsService } from '../aws.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as http from 'https';
 import { VaultService } from '../../vault/vault.service';
+import { ClientKafka } from '@nestjs/microservices';
+import { User } from '../../user/schemas/user.schema';
+import { UserTypes } from '../../user/enums/types.enum';
 
 @Injectable()
 export class UserAuthenticationListener {
@@ -17,15 +20,20 @@ export class UserAuthenticationListener {
 
   @Inject(VaultService)
   private readonly vaultService: VaultService;
+
+  @Inject('EscortBook')
+  private readonly client: ClientKafka;
   
   @OnEvent(Events.SignUp, { async: true })
-  async handleUserSignUp(email: string, verificationToken: string): Promise<void> {
+  async handleUserSignUp(user: User): Promise<void> {
     const messageAttributes: AWS.SQS.MessageBodySystemAttributeMap = {
       event: {
         DataType: 'String',
         StringValue: Events.SignUp,
       },
     };
+
+    const { email, type, verificationToken } = user;
 
     try {
       const verificationEndpoint = await this.vaultService
@@ -43,6 +51,9 @@ export class UserAuthenticationListener {
       });
 
       await this.awsService.sendMessageAsync(messageAttributes, body);
+      type == UserTypes.Customer ?
+        this.client.emit('customer-created', JSON.stringify(user)) :
+        this.client.emit('escort-created', JSON.stringify(user));
     }
     catch {
       this.eventEmitter.emit(Events.DeleteUser, { email });

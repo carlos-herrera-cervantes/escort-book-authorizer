@@ -9,26 +9,9 @@ import { AuthenticationController } from './authentication.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AccessTokenModule } from '../access-token/access-token.module';
 import { VaultModule } from '../vault/vault.module';
-import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
-    ClientsModule.registerAsync([
-      {
-        name: 'EscortBook',
-        imports: [ConfigModule],
-        inject: [ConfigService],
-        useFactory: async (configService: ConfigService) => ({
-          transport: Transport.KAFKA,
-          options: {
-            client: {
-              clientId: 'Authorizer',
-              brokers: [configService.get<string>('KAFKA_HOST')],
-            },
-          },
-        }),
-      },
-    ]),
     VaultModule,
     AccessTokenModule,
     UserModule,

@@ -20,16 +20,12 @@ import { User } from '../user/schemas/user.schema';
 import { RevokeJwtGuard } from '../access-token/guards/revoke-jwt.guard';
 import { Response } from 'express';
 import { UserTypes } from '../user/enums/types.enum';
-import { ClientKafka } from '@nestjs/microservices';
 
 @Controller('/api/v1/authentication')
 export class AuthenticationController {
 
   @Inject(AuthenticationService)
   private readonly authenticationService: AuthenticationService;
-
-  @Inject('EscortBook')
-  private readonly client: ClientKafka;
 
   @Get('verification/customer/:verification_token')
   async verifyCustomerAsync(
@@ -57,11 +53,7 @@ export class AuthenticationController {
 
   @Post('/customer/sign-up')
   async registerCustomerAsync(@Body() user: CreateUserDto): Promise<MessageResponseDto> {
-    const [message, customer] = await this.authenticationService
-      .signUpCustomerAsync(user, UserTypes.Customer);
-
-    this.client.emit('customer.created', customer);
-    return message;
+    return this.authenticationService.signUpCustomerAsync(user, UserTypes.Customer);
   }
 
   @Post('/user/sign-up')
@@ -71,10 +63,6 @@ export class AuthenticationController {
 
   @Post('/escort/sign-up')
   async registerEscortAsync(@Body() user: CreateUserDto): Promise<MessageResponseDto> {
-    const [message, escort] = await this.authenticationService
-      .signUpCustomerAsync(user, UserTypes.Escort);
-
-    this.client.emit('escort.created', escort);
-    return message;
+    return this.authenticationService.signUpCustomerAsync(user, UserTypes.Escort);
   }
 }
