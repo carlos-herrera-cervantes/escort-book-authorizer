@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { VaultModule } from '../vault/vault.module';
 import { AwsService } from './aws.service';
 import { UserAuthenticationListener } from './listeners/user-authentication.listener';
 
@@ -23,7 +22,6 @@ import { UserAuthenticationListener } from './listeners/user-authentication.list
         }),
       },
     ]),
-    VaultModule
   ],
   providers: [AwsService, UserAuthenticationListener]
 })

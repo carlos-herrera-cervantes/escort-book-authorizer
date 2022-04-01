@@ -8,11 +8,9 @@ import { HashingModule } from '../hashing/hashing.module';
 import { AuthenticationController } from './authentication.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AccessTokenModule } from '../access-token/access-token.module';
-import { VaultModule } from '../vault/vault.module';
 
 @Module({
   imports: [
-    VaultModule,
     AccessTokenModule,
     UserModule,
     HashingModule,

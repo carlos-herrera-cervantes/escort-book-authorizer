@@ -1,35 +1,27 @@
-import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as AWS from 'aws-sdk';
-import { VaultService } from '../vault/vault.service';
 
 @Injectable()
-export class AwsService implements OnModuleInit {
+export class AwsService {
 
   private queueUrl: string;
 
   private sqs: AWS.SQS;
 
-  @Inject(VaultService)
-  private readonly vaultService: VaultService;
-
-  async onModuleInit(): Promise<void> {
+  constructor(private readonly configService: ConfigService) {
     AWS.config.update({
-      region: await this.vaultService.getSecretAsync('escort-book-region'),
+      region: this.configService.get<string>('REGION'),
     });
 
-    this.queueUrl = await this.vaultService
-      .getSecretAsync('escort-book-messenger-sqs-url');
-    const awsEndpoint = await this.vaultService
-      .getSecretAsync('escort-book-aws-endpoint');
+    this.queueUrl = this.configService.get<string>('QUEUE_URL');
+    const awsEndpoint = this.configService.get<string>('AWS_ENDPOINT');
 
     this.sqs = new AWS.SQS({
-      apiVersion: await this.vaultService
-        .getSecretAsync('escort-book-sqs-version'),
+      apiVersion: this.configService.get<string>('SQS_VERSION'),
       endpoint: new AWS.Endpoint(awsEndpoint),
-      accessKeyId: await this.vaultService
-        .getSecretAsync('escort-book-access-key-id'),
-      secretAccessKey: await this.vaultService
-        .getSecretAsync('escort-book-secret-access-key'),
+      accessKeyId: this.configService.get<string>('ACCESS_KEY_ID'),
+      secretAccessKey: this.configService.get<string>('SECRET_ACCESS_KEY'),
     });
   }
 
