@@ -4,10 +4,10 @@ import { Events } from '../../common/enums/events.enum';
 import { AwsService } from '../aws.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as http from 'https';
-import { VaultService } from '../../vault/vault.service';
 import { ClientKafka } from '@nestjs/microservices';
 import { User } from '../../user/schemas/user.schema';
 import { UserTypes } from '../../user/enums/types.enum';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserAuthenticationListener {
@@ -18,8 +18,8 @@ export class UserAuthenticationListener {
   @Inject(EventEmitter2)
   private readonly eventEmitter: EventEmitter2;
 
-  @Inject(VaultService)
-  private readonly vaultService: VaultService;
+  @Inject(ConfigService)
+  private readonly configService: ConfigService;
 
   @Inject('EscortBook')
   private readonly client: ClientKafka;
@@ -36,17 +36,15 @@ export class UserAuthenticationListener {
     const { email, type, verificationToken } = user;
 
     try {
-      const verificationEndpoint = await this.vaultService
-        .getSecretAsync('escort-book-verification-endpoint');
+      const verificationEndpoint = this.configService.get<string>('VERIFICATION_ENDPOINT');
       const verificationUrl = `${verificationEndpoint}/${verificationToken}`;
 
-      const welcomeTemplateUrl = await this.vaultService
-        .getSecretAsync('escort-book-welcome-template');
+      const welcomeTemplateUrl = this.configService.get<string>('WELCOME_TEMPLATE');
       const welcomeTemplate = await this.readTemplate(welcomeTemplateUrl);
 
       const body = JSON.stringify({
         to: email,
-        subject: await this.vaultService.getSecretAsync('escort-book-welcome-subject'),
+        subject: this.configService.get<string>('WELCOME_SUBJECT'),
         body: welcomeTemplate.replace('{{placeholder}}', verificationUrl),
       });
 

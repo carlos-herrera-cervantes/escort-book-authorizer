@@ -9,8 +9,8 @@ import { CreateUserDto } from '../user/dto/create-user.dto';
 import { Role } from '../user/enums/roles.enum';
 import { MessageResponseDto } from '../common/dto/message-response.dto';
 import * as http from 'https';
-import { VaultService } from '../vault/vault.service';
 import { UserTypes } from '../user/enums/types.enum';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthenticationService {
@@ -27,8 +27,8 @@ export class AuthenticationService {
   @Inject(EventEmitter2)
   private readonly eventEmitter: EventEmitter2;
 
-  @Inject(VaultService)
-  private readonly vaultService: VaultService;
+  @Inject(ConfigService)
+  private readonly configService: ConfigService;
 
   async validateUserAsync(email: string, password: string) {
     const user = await this.userService.getOneAsync({ email });
@@ -93,8 +93,7 @@ export class AuthenticationService {
   }
 
   async getSuccessTemplateAsync(): Promise<string> {
-    const successTemplateUrl = await this.vaultService
-      .getSecretAsync('escort-book-success-verification-template');
+    const successTemplateUrl = this.configService.get<string>('VERIFICATION_TEMPLATE');
 
     return new Promise((resolve, reject) => {
       const request = http.get(successTemplateUrl, response => {

@@ -7,7 +7,6 @@ import { HashingModule } from './hashing/hashing.module';
 import { UserModule } from './user/user.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AwsModule } from './aws/aws.module';
-import { VaultModule } from './vault/vault.module';
 
 @Module({
   imports: [
@@ -25,7 +24,6 @@ import { VaultModule } from './vault/vault.module';
     HashingModule,
     UserModule,
     AwsModule,
-    VaultModule
   ],
   controllers: [],
   providers: [],

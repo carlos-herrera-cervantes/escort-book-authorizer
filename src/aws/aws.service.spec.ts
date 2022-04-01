@@ -1,5 +1,5 @@
+import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
-import { VaultService } from '../vault/vault.service';
 import { AwsService } from './aws.service';
 
 describe('AwsService', () => {
@@ -10,8 +10,10 @@ describe('AwsService', () => {
       providers: [
         AwsService,
         {
-          provide: VaultService,
-          useValue: {},
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn().mockReturnValue('dummy'),
+          },
         },
       ],
     }).compile();
