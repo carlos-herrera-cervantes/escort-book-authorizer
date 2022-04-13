@@ -14,12 +14,13 @@ export class RevokeJwtGuard implements CanActivate {
   private readonly accessTokenService: AccessTokenService;
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const { headers } = context.switchToHttp().getRequest();
+    const { headers, body } = context.switchToHttp().getRequest();
     const accessToken: string = headers?.authorization?.split(' ').pop();
 
     const isValid = await this.accessTokenService.getOneAsync({ token: accessToken });
 
     if (isValid) {
+      body.user = { email: isValid.user };
       return true;
     }
 
