@@ -11,7 +11,7 @@ export class UserService {
   @InjectModel(User.name)
   private readonly userModel: Model<UserDocument>;
 
-  async getOneAsync(filter: any): Promise<User> {
+  async getOneAsync(filter: FilterQuery<UserDocument>): Promise<User> {
     return this.userModel.findOne(filter).lean();
   }
 
@@ -19,7 +19,7 @@ export class UserService {
     return this.userModel.create(user);
   }
 
-  async updateOnePartialAsync(filter: any, user: UpdateUserDto): Promise<User> {
+  async updateOnePartialAsync(filter: FilterQuery<UserDocument>, user: UpdateUserDto): Promise<User> {
     return this.userModel.findOneAndUpdate(filter, { $set: user }, { new: true });
   }
 

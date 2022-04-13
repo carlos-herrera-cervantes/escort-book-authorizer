@@ -28,4 +28,8 @@ export class CreateUserDto {
   @IsString()
   @IsEnum(UserTypes)
   type: UserTypes;
+
+  @IsOptional()
+  @IsString()
+  firebaseToken: string;
 }

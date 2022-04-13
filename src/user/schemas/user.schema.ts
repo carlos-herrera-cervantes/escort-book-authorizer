@@ -29,6 +29,9 @@ export class User {
   @Prop({ default: UserTypes.Organization })
   type: string;
 
+  @Prop()
+  firebaseToken: string;
+
   @Prop({ default: new Date().toUTCString() })
   createdAt: Date;
 
