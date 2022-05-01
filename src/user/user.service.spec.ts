@@ -1,5 +1,6 @@
 import { getModelToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
+import { Role } from './schemas/role.schema';
 import { User } from './schemas/user.schema';
 import { UserService } from './user.service';
 
@@ -14,6 +15,10 @@ describe('UserService', () => {
           provide: getModelToken(User.name),
           useValue: {},
         },
+        {
+          provide: getModelToken(Role.name),
+          useValue: {},
+        }
       ],
     }).compile();
 

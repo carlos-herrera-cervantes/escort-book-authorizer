@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Role, RoleDocument } from './schemas/role.schema';
 
 @Injectable()
 export class UserService {
@@ -11,8 +12,15 @@ export class UserService {
   @InjectModel(User.name)
   private readonly userModel: Model<UserDocument>;
 
+  @InjectModel(Role.name)
+  private readonly roleModel: Model<RoleDocument>;
+
   async getOneAsync(filter: FilterQuery<UserDocument>): Promise<User> {
     return this.userModel.findOne(filter).lean();
+  }
+  
+  async getRoles(): Promise<Role[]> {
+    return this.roleModel.find().lean();
   }
 
   async createAsync(user: CreateUserDto): Promise<User> {

@@ -4,11 +4,9 @@ import { HashingService } from '../hashing/hashing.service';
 import { UserService } from '../user/user.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Events } from '../common/enums/events.enum';
-import { User } from '../user/schemas/user.schema';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { Role } from '../user/enums/roles.enum';
 import { MessageResponseDto } from '../common/dto/message-response.dto';
-import * as http from 'https';
 import { UserTypes } from '../user/enums/types.enum';
 import { ConfigService } from '@nestjs/config';
 
@@ -42,8 +40,8 @@ export class AuthenticationService {
     return null;
   }
 
-  logoutAsync(token: string): void {
-    this.eventEmitter.emit(Events.UserLogout, token);
+  logoutAsync(email: string): void {
+    this.eventEmitter.emit(Events.UserLogout, email);
   }
 
   async loginAsync(user: any): Promise<string> {
@@ -62,10 +60,27 @@ export class AuthenticationService {
     return token;
   }
 
-  async signUpUserAsync(user: CreateUserDto): Promise<User> {
-    user.verified = true;
+  async signUpUserAsync(user: CreateUserDto): Promise<MessageResponseDto> {
+    const verificationToken = await this.jwtService.signAsync({ user: user.email });
+
     user.type = UserTypes.Organization;
-    return this.userService.createAsync(user);
+    user.verificationToken = verificationToken;
+
+    if (!user.roles) {
+      user.roles = [Role.Employee];
+    }
+
+    const created = await this.userService.createAsync(user);
+    const config = {
+      user: created,
+      verificationEndpoint: `${this.configService.get<string>('HOST')}/api/v1/authentication/verification/users`,
+      templateUrl: this.configService.get<string>('WELCOME_USER_TEMPLATE'),
+      subject: this.configService.get<string>('WELCOME_USER_SUBJECT'),
+    };
+
+    this.eventEmitter.emit(Events.SignUp, config);
+
+    return { message: 'A varification email was sent to the employee' };
   }
 
   async signUpCustomerAsync(
@@ -79,7 +94,14 @@ export class AuthenticationService {
     user.type = userType;
     
     const created = await this.userService.createAsync(user);
-    this.eventEmitter.emit(Events.SignUp, created);
+    const config = {
+      user: created,
+      verificationEndpoint: `${this.configService.get<string>('HOST')}/api/v1/authentication/verification/customer`,
+      templateUrl: this.configService.get<string>('WELCOME_CUSTOMER_TEMPLATE'),
+      subject: this.configService.get<string>('WELCOME_CUSTOMER_SUBJECT'),
+    };
+
+    this.eventEmitter.emit(Events.SignUp, config);
 
     return { message: 'A varification email was sent to you' };
   }
@@ -96,22 +118,6 @@ export class AuthenticationService {
     });
 
     await this.userService.updateOnePartialAsync({ verificationToken }, { verified: true })
-  }
-
-  async getSuccessTemplateAsync(): Promise<string> {
-    const successTemplateUrl = this.configService.get<string>('VERIFICATION_TEMPLATE');
-
-    return new Promise((resolve, reject) => {
-      const request = http.get(successTemplateUrl, response => {
-        let data: string = '';
-
-        response.on('data', chunk => data += chunk);
-        response.on('end', () => resolve(data));
-      });
-  
-      request.on('error', error => reject(error));
-      request.end();
-    });
   }
 
 }

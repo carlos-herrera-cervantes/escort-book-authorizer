@@ -17,7 +17,7 @@ export class User {
   @Prop({ required: true })
   password: string;
 
-  @Prop({ default: [ Role.Viewer ] })
+  @Prop({ default: [ Role.Employee ] })
   roles: Role[];
 
   @Prop({ default: false })
@@ -52,8 +52,4 @@ UserSchema.pre<UserDocument>('save', async function () {
   if (this.password) {
     this.password = await hashingService.hashAsync(this.password);
   }
-});
-
-UserSchema.post<UserDocument>('save', function (doc) {
-  this.password = null;
 });
