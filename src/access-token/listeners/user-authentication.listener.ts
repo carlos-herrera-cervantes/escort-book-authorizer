@@ -15,8 +15,8 @@ export class UserAuthenticationListener {
   }
 
   @OnEvent(Events.UserLogout, { async: true })
-  async handlerUserLogout(token: string): Promise<void> {
-    await this.accessTokenService.deleteOneAsync(token);
+  async handlerUserLogout(email: string): Promise<void> {
+    await this.accessTokenService.deleteOneAsync({ email });
   }
 
   @OnEvent(Events.InvalidateSessions, { async: true })
