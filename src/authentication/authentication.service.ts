@@ -50,7 +50,7 @@ export class AuthenticationService {
       roles: user?.roles,
       id: user?._id,
       type: user?.type,
-      firebaseToken: user?.firebaseToken,
+      firebaseToken: user?.firebaseToken ?? '',
     };
     const token = await this.jwtService.signAsync(payload);
 
