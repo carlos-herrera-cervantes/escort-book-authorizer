@@ -38,6 +38,9 @@ export class User {
   @Prop({ default: new Date().toUTCString() })
   updateAt: Date;
 
+  @Prop({ default: false })
+  block: boolean;
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

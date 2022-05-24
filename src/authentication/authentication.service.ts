@@ -45,6 +45,11 @@ export class AuthenticationService {
   }
 
   async loginAsync(user: any): Promise<string> {
+    const blockUser = user?.block &&
+      (user?.type == UserTypes.Customer || user?.type == UserTypes.Escort);
+    
+    if (blockUser) throw new ForbiddenException();
+
     const payload = {
       email: user?.email,
       roles: user?.roles,
@@ -90,7 +95,7 @@ export class AuthenticationService {
     const verificationToken = await this.jwtService.signAsync({ user: user.email });
     
     user.roles = [Role.Customer];
-    user.verificationToken = verificationToken
+    user.verificationToken = verificationToken;
     user.type = userType;
     
     const created = await this.userService.createAsync(user);
