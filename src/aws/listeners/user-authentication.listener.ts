@@ -10,7 +10,6 @@ import '../../common/extensions/string.extension';
 
 @Injectable()
 export class UserAuthenticationListener {
-
   @Inject(AwsService)
   private readonly awsService: AwsService;
 
@@ -19,7 +18,7 @@ export class UserAuthenticationListener {
 
   @Inject('EscortBook')
   private readonly client: ClientKafka;
-  
+
   @OnEvent(Events.SignUp, { async: true })
   async handleUserSignUp(queueMessage: QueueMessageDTO): Promise<void> {
     const messageAttributes: AWS.SQS.MessageBodySystemAttributeMap = {
@@ -43,14 +42,16 @@ export class UserAuthenticationListener {
       });
 
       await this.awsService.sendMessageAsync(messageAttributes, body);
-      const topic = type == UserTypes.Customer ? 'customer-created' :
-        type == UserTypes.Escort ? 'escort-created' : 'user-created';
+      const topic =
+        type == UserTypes.Customer
+          ? 'customer-created'
+          : type == UserTypes.Escort
+          ? 'escort-created'
+          : 'user-created';
 
       this.client.emit(topic, JSON.stringify(user));
-    }
-    catch {
+    } catch {
       this.eventEmitter.emit(Events.DeleteUser, { email });
     }
   }
-
 }

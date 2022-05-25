@@ -4,8 +4,7 @@ import * as AWS from 'aws-sdk';
 
 @Injectable()
 export class AwsService {
-
-  private queueUrl: string;
+  private readonly queueUrl: string;
 
   private sqs: AWS.SQS;
 
@@ -37,5 +36,4 @@ export class AwsService {
 
     await this.sqs.sendMessage(params).promise();
   }
-  
 }

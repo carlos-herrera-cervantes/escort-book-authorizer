@@ -23,6 +23,6 @@ import { UserAuthenticationListener } from './listeners/user-authentication.list
       },
     ]),
   ],
-  providers: [AwsService, UserAuthenticationListener]
+  providers: [AwsService, UserAuthenticationListener],
 })
 export class AwsModule {}

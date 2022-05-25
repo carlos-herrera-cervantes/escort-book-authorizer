@@ -18,7 +18,7 @@ describe('UserService', () => {
         {
           provide: getModelToken(Role.name),
           useValue: {},
-        }
+        },
       ],
     }).compile();
 

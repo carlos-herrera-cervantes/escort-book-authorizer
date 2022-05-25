@@ -5,7 +5,6 @@ import { AccessTokenService } from '../access-token.service';
 
 @Injectable()
 export class UserAuthenticationListener {
-
   @Inject(AccessTokenService)
   private readonly accessTokenService: AccessTokenService;
 
@@ -23,5 +22,4 @@ export class UserAuthenticationListener {
   async handleInvalidateSessions(user: string): Promise<void> {
     await this.accessTokenService.deleteManyAsync({ user });
   }
-  
 }

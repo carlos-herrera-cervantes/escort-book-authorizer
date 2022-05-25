@@ -5,8 +5,7 @@ export type AccessTokenDocument = AccessToken & Document;
 
 @Schema({ versionKey: false })
 export class AccessToken {
-
-  id: string
+  id: string;
 
   @Prop({ required: true })
   user: string;
@@ -19,7 +18,6 @@ export class AccessToken {
 
   @Prop({ default: new Date().toUTCString() })
   updateAt: Date;
-
 }
 
 export const AccessTokenSchema = SchemaFactory.createForClass(AccessToken);

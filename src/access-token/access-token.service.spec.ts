@@ -13,7 +13,7 @@ describe('AccessTokenService', () => {
         {
           provide: getModelToken(AccessToken.name),
           useValue: {},
-        }
+        },
       ],
     }).compile();
 

@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { HashingService } from '../hashing/hashing.service';
 import { UserService } from '../user/user.service';
@@ -12,7 +17,6 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthenticationService {
-
   @Inject(UserService)
   private readonly userService: UserService;
 
@@ -30,13 +34,16 @@ export class AuthenticationService {
 
   async validateUserAsync(email: string, password: string) {
     const user = await this.userService.getOneAsync({ email });
-    const validPassword = await this.hashingService.compareAsync(password, user.password);
+    const validPassword = await this.hashingService.compareAsync(
+      password,
+      user.password,
+    );
 
     if (validPassword) {
       const { password, ...args } = user;
       return args;
     }
-    
+
     return null;
   }
 
@@ -45,9 +52,10 @@ export class AuthenticationService {
   }
 
   async loginAsync(user: any): Promise<string> {
-    const blockUser = user?.block &&
+    const blockUser =
+      user?.block &&
       (user?.type == UserTypes.Customer || user?.type == UserTypes.Escort);
-    
+
     if (blockUser) throw new ForbiddenException();
 
     const payload = {
@@ -66,7 +74,9 @@ export class AuthenticationService {
   }
 
   async signUpUserAsync(user: CreateUserDto): Promise<MessageResponseDto> {
-    const verificationToken = await this.jwtService.signAsync({ user: user.email });
+    const verificationToken = await this.jwtService.signAsync({
+      user: user.email,
+    });
 
     user.type = UserTypes.Organization;
     user.verificationToken = verificationToken;
@@ -76,39 +86,43 @@ export class AuthenticationService {
     }
 
     const created = await this.userService.createAsync(user);
+    const host = this.configService.get<string>('HOST');
     const config = {
       user: created,
-      verificationEndpoint: `${this.configService.get<string>('HOST')}/api/v1/authentication/verification/users`,
+      verificationEndpoint: `${host}/api/v1/authentication/verification/users`,
       templateUrl: this.configService.get<string>('WELCOME_USER_TEMPLATE'),
       subject: this.configService.get<string>('WELCOME_USER_SUBJECT'),
     };
 
     this.eventEmitter.emit(Events.SignUp, config);
 
-    return { message: 'A varification email was sent to the employee' };
+    return { message: 'A verification email was sent to the employee' };
   }
 
   async signUpCustomerAsync(
     user: CreateUserDto,
     userType: UserTypes,
   ): Promise<MessageResponseDto> {
-    const verificationToken = await this.jwtService.signAsync({ user: user.email });
-    
+    const verificationToken = await this.jwtService.signAsync({
+      user: user.email,
+    });
+
     user.roles = [Role.Customer];
     user.verificationToken = verificationToken;
     user.type = userType;
-    
+
     const created = await this.userService.createAsync(user);
+    const host = this.configService.get<string>('HOST');
     const config = {
       user: created,
-      verificationEndpoint: `${this.configService.get<string>('HOST')}/api/v1/authentication/verification/customer`,
+      verificationEndpoint: `${host}/api/v1/authentication/verification/customer`,
       templateUrl: this.configService.get<string>('WELCOME_CUSTOMER_TEMPLATE'),
       subject: this.configService.get<string>('WELCOME_CUSTOMER_SUBJECT'),
     };
 
     this.eventEmitter.emit(Events.SignUp, config);
 
-    return { message: 'A varification email was sent to you' };
+    return { message: 'A verification email was sent to you' };
   }
 
   async verifyCustomerAsync(verificationToken: string): Promise<void> {
@@ -122,7 +136,8 @@ export class AuthenticationService {
       throw new BadRequestException('The verification token is not valid');
     });
 
-    await this.userService.updateOnePartialAsync({ verificationToken }, { verified: true })
+    const filter = { verificationToken };
+    const changes = { verified: true };
+    await this.userService.updateOnePartialAsync(filter, changes);
   }
-
 }

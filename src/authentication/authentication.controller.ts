@@ -24,7 +24,6 @@ import '../common/extensions/string.extension';
 
 @Controller('/api/v1/authentication')
 export class AuthenticationController {
-
   @Inject(AuthenticationService)
   private readonly authenticationService: AuthenticationService;
 
@@ -37,7 +36,9 @@ export class AuthenticationController {
     @Param('verification_token') verificationToken: string,
   ): Promise<any> {
     await this.authenticationService.verifyCustomerAsync(verificationToken);
-    const templateUrl = this.configService.get<string>('VERIFICATION_CUSTOMER_TEMPLATE');
+    const templateUrl = this.configService.get<string>(
+      'VERIFICATION_CUSTOMER_TEMPLATE',
+    );
     const html = await templateUrl.readHtml();
     res.send(html);
   }
@@ -48,7 +49,9 @@ export class AuthenticationController {
     @Param('verification_token') verificationToken: string,
   ): Promise<any> {
     await this.authenticationService.verifyCustomerAsync(verificationToken);
-    const templateUrl = this.configService.get<string>('VERIFICATION_USER_TEMPLATE');
+    const templateUrl = this.configService.get<string>(
+      'VERIFICATION_USER_TEMPLATE',
+    );
     const html = await templateUrl.readHtml();
     res.send(html);
   }
@@ -56,7 +59,9 @@ export class AuthenticationController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async loginAsync(@Req() req: any): Promise<JwtResponseDto> {
-    return { accessToken: await this.authenticationService.loginAsync(req?.user) };
+    return {
+      accessToken: await this.authenticationService.loginAsync(req?.user),
+    };
   }
 
   @Post('logout')
@@ -67,17 +72,29 @@ export class AuthenticationController {
   }
 
   @Post('/customers/sign-up')
-  async registerCustomerAsync(@Body() user: CreateUserDto): Promise<MessageResponseDto> {
-    return this.authenticationService.signUpCustomerAsync(user, UserTypes.Customer);
+  async registerCustomerAsync(
+    @Body() user: CreateUserDto,
+  ): Promise<MessageResponseDto> {
+    return this.authenticationService.signUpCustomerAsync(
+      user,
+      UserTypes.Customer,
+    );
   }
 
   @Post('/users/sign-up')
-  async registerUserAsync(@Body() user: CreateUserDto): Promise<MessageResponseDto> {
+  async registerUserAsync(
+    @Body() user: CreateUserDto,
+  ): Promise<MessageResponseDto> {
     return this.authenticationService.signUpUserAsync(user);
   }
 
   @Post('/escorts/sign-up')
-  async registerEscortAsync(@Body() user: CreateUserDto): Promise<MessageResponseDto> {
-    return this.authenticationService.signUpCustomerAsync(user, UserTypes.Escort);
+  async registerEscortAsync(
+    @Body() user: CreateUserDto,
+  ): Promise<MessageResponseDto> {
+    return this.authenticationService.signUpCustomerAsync(
+      user,
+      UserTypes.Escort,
+    );
   }
 }

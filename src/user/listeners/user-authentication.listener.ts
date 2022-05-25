@@ -7,7 +7,6 @@ import { UserService } from '../user.service';
 
 @Injectable()
 export class UserAuthenticationListener {
-
   @Inject(UserService)
   private readonly userService: UserService;
 
@@ -15,5 +14,4 @@ export class UserAuthenticationListener {
   async handleUserSignUp(filter: FilterQuery<UserDocument>): Promise<void> {
     await this.userService.deleteOneAsync(filter);
   }
-
 }

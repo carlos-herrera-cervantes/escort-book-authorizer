@@ -6,7 +6,9 @@ import { AccessToken, AccessTokenSchema } from './schemas/access-token.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: AccessToken.name, schema: AccessTokenSchema }]),
+    MongooseModule.forFeature([
+      { name: AccessToken.name, schema: AccessTokenSchema },
+    ]),
   ],
   providers: [AccessTokenService, UserAuthenticationListener],
   exports: [AccessTokenService],
