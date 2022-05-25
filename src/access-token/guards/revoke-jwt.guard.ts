@@ -9,7 +9,6 @@ import { AccessTokenService } from '../access-token.service';
 
 @Injectable()
 export class RevokeJwtGuard implements CanActivate {
-
   @Inject(AccessTokenService)
   private readonly accessTokenService: AccessTokenService;
 
@@ -17,7 +16,9 @@ export class RevokeJwtGuard implements CanActivate {
     const { headers, body } = context.switchToHttp().getRequest();
     const accessToken: string = headers?.authorization?.split(' ').pop();
 
-    const isValid = await this.accessTokenService.getOneAsync({ token: accessToken });
+    const isValid = await this.accessTokenService.getOneAsync({
+      token: accessToken,
+    });
 
     if (isValid) {
       body.user = { email: isValid.user };

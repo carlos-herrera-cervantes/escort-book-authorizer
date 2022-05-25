@@ -8,7 +8,6 @@ import { Role, RoleDocument } from './schemas/role.schema';
 
 @Injectable()
 export class UserService {
-
   @InjectModel(User.name)
   private readonly userModel: Model<UserDocument>;
 
@@ -18,7 +17,7 @@ export class UserService {
   async getOneAsync(filter: FilterQuery<UserDocument>): Promise<User> {
     return this.userModel.findOne(filter).lean();
   }
-  
+
   async getRoles(): Promise<Role[]> {
     return this.roleModel.find().lean();
   }
@@ -27,12 +26,18 @@ export class UserService {
     return this.userModel.create(user);
   }
 
-  async updateOnePartialAsync(filter: FilterQuery<UserDocument>, user: UpdateUserDto): Promise<User> {
-    return this.userModel.findOneAndUpdate(filter, { $set: user }, { new: true });
+  async updateOnePartialAsync(
+    filter: FilterQuery<UserDocument>,
+    user: UpdateUserDto,
+  ): Promise<User> {
+    return this.userModel.findOneAndUpdate(
+      filter,
+      { $set: user },
+      { new: true },
+    );
   }
 
   async deleteOneAsync(filter: FilterQuery<UserDocument>): Promise<void> {
     await this.userModel.findOneAndDelete(filter);
   }
-
 }

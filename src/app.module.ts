@@ -15,9 +15,9 @@ import { AwsModule } from './aws/aws.module';
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('DB_URI')
+        uri: configService.get<string>('DB_URI'),
       }),
-      inject: [ConfigService]
+      inject: [ConfigService],
     }),
     AuthenticationModule,
     AccessTokenModule,

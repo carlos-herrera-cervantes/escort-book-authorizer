@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';
 import { AuthenticationService } from '../authentication.service';
@@ -10,7 +14,10 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(email: string, password: string): Promise<any> {
-    const user = await this.authenticationService.validateUserAsync(email, password);
+    const user = await this.authenticationService.validateUserAsync(
+      email,
+      password,
+    );
 
     if (!user.verified) {
       throw new ForbiddenException('The account is not verified');
@@ -19,7 +26,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new UnauthorizedException();
     }
-    
+
     return user;
   }
 }
