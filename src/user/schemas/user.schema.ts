@@ -39,6 +39,9 @@ export class User {
 
   @Prop({ default: false })
   block: boolean;
+
+  @Prop({ default: false })
+  deactivated: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

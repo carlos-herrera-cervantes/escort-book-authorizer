@@ -14,6 +14,8 @@ import { Role } from '../user/enums/roles.enum';
 import { MessageResponseDto } from '../common/dto/message-response.dto';
 import { UserTypes } from '../user/enums/types.enum';
 import { ConfigService } from '@nestjs/config';
+import { ClientKafka } from '@nestjs/microservices';
+import { KafkaTopics } from '../common/enums/topics.enum';
 
 @Injectable()
 export class AuthenticationService {
@@ -31,6 +33,9 @@ export class AuthenticationService {
 
   @Inject(ConfigService)
   private readonly configService: ConfigService;
+
+  @Inject('EscortBook')
+  private readonly kafkaClient: ClientKafka;
 
   async validateUserAsync(email: string, password: string) {
     const user = await this.userService.getOneAsync({ email });
@@ -69,6 +74,18 @@ export class AuthenticationService {
 
     this.eventEmitter.emit(Events.InvalidateSessions, user?.email);
     this.eventEmitter.emit(Events.UserLogin, token, user?.email);
+
+    if (user?.deactivated) {
+      await this.userService.updateOnePartialAsync(
+        { _id: user?._id },
+        { deactivated: false },
+      );
+      const message = { userId: user?._id };
+      this.kafkaClient.emit(
+        KafkaTopics.USER_ACTIVE_ACCOUNT,
+        JSON.stringify(message),
+      );
+    }
 
     return token;
   }

@@ -6,6 +6,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientKafka } from '@nestjs/microservices';
 import { UserTypes } from '../../user/enums/types.enum';
 import { QueueMessageDTO } from '../dto/queue-message.dto';
+import { KafkaTopics } from '../../common/enums/topics.enum';
 import '../../common/extensions/string.extension';
 
 @Injectable()
@@ -17,7 +18,7 @@ export class UserAuthenticationListener {
   private readonly eventEmitter: EventEmitter2;
 
   @Inject('EscortBook')
-  private readonly client: ClientKafka;
+  private readonly kafkaClient: ClientKafka;
 
   @OnEvent(Events.SignUp, { async: true })
   async handleUserSignUp(queueMessage: QueueMessageDTO): Promise<void> {
@@ -30,9 +31,9 @@ export class UserAuthenticationListener {
 
     const { user, verificationEndpoint, templateUrl, subject } = queueMessage;
     const { verificationToken, type, email } = user;
+    const verificationUrl = `${verificationEndpoint}/${verificationToken}`;
 
     try {
-      const verificationUrl = `${verificationEndpoint}/${verificationToken}`;
       const welcomeTemplate = await templateUrl.readHtml();
 
       const body = JSON.stringify({
@@ -44,12 +45,12 @@ export class UserAuthenticationListener {
       await this.awsService.sendMessageAsync(messageAttributes, body);
       const topic =
         type == UserTypes.Customer
-          ? 'customer-created'
+          ? KafkaTopics.CUSTOMER_CREATED
           : type == UserTypes.Escort
-          ? 'escort-created'
-          : 'user-created';
+          ? KafkaTopics.ESCORT_CREATED
+          : KafkaTopics.USER_CREATED;
 
-      this.client.emit(topic, JSON.stringify(user));
+      this.kafkaClient.emit(topic, JSON.stringify(user));
     } catch {
       this.eventEmitter.emit(Events.DeleteUser, { email });
     }
