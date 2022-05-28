@@ -39,4 +39,8 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   firebaseToken: string;
+
+  @IsOptional()
+  @IsBoolean()
+  deactivated: boolean;
 }

@@ -15,7 +15,7 @@ import { UserAuthenticationListener } from './listeners/user-authentication.list
           transport: Transport.KAFKA,
           options: {
             client: {
-              clientId: 'Authorizer',
+              clientId: 'AWS',
               brokers: [configService.get<string>('BROKERS')],
             },
           },
