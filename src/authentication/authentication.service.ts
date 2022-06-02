@@ -16,6 +16,8 @@ import { UserTypes } from '../user/enums/types.enum';
 import { ConfigService } from '@nestjs/config';
 import { ClientKafka } from '@nestjs/microservices';
 import { KafkaTopics } from '../common/enums/topics.enum';
+import { EmailConfigDto } from './dto/email-config.dto';
+import '../common/extensions/string.extension';
 
 @Injectable()
 export class AuthenticationService {
@@ -111,7 +113,7 @@ export class AuthenticationService {
       subject: this.configService.get<string>('WELCOME_USER_SUBJECT'),
     };
 
-    this.eventEmitter.emit(Events.SignUp, config);
+    await this.emitEmailMessage(config);
 
     return { message: 'A verification email was sent to the employee' };
   }
@@ -137,7 +139,7 @@ export class AuthenticationService {
       subject: this.configService.get<string>('WELCOME_CUSTOMER_SUBJECT'),
     };
 
-    this.eventEmitter.emit(Events.SignUp, config);
+    await this.emitEmailMessage(config);
 
     return { message: 'A verification email was sent to you' };
   }
@@ -156,5 +158,31 @@ export class AuthenticationService {
     const filter = { verificationToken };
     const changes = { verified: true };
     await this.userService.updateOnePartialAsync(filter, changes);
+  }
+
+  private async emitEmailMessage(emailConfig: EmailConfigDto) {
+    const { user, verificationEndpoint, templateUrl, subject } = emailConfig;
+    const { verificationToken, type, email } = user;
+    const verificationUrl = `${verificationEndpoint}/${verificationToken}`;
+
+    try {
+      const welcomeTemplate = await templateUrl.readHtml();
+      const emailMessage = JSON.stringify({
+        to: email,
+        subject,
+        body: welcomeTemplate.replace('{{placeholder}}', verificationUrl),
+      });
+      const topic =
+        type == UserTypes.Customer
+          ? KafkaTopics.CUSTOMER_CREATED
+          : type == UserTypes.Escort
+          ? KafkaTopics.ESCORT_CREATED
+          : KafkaTopics.USER_CREATED;
+
+      this.kafkaClient.emit(topic, JSON.stringify(user));
+      this.kafkaClient.emit(KafkaTopics.SEND_EMAIL, emailMessage);
+    } catch {
+      this.eventEmitter.emit(Events.DeleteUser, { email });
+    }
   }
 }

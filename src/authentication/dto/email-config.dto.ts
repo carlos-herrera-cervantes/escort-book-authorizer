@@ -1,6 +1,6 @@
 import { User } from '../../user/schemas/user.schema';
 
-export class QueueMessageDTO {
+export class EmailConfigDto {
   user: User;
   verificationEndpoint: string;
   templateUrl: string;

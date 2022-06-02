@@ -33,6 +33,10 @@ describe('AuthenticationService', () => {
           provide: ConfigService,
           useValue: {},
         },
+        {
+          provide: 'EscortBook',
+          useValue: {},
+        },
       ],
     }).compile();
 
