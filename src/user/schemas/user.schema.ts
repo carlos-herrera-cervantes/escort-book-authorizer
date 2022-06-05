@@ -42,6 +42,9 @@ export class User {
 
   @Prop({ default: false })
   deactivated: boolean;
+
+  @Prop({ default: false })
+  delete: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

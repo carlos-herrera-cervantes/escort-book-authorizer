@@ -77,10 +77,10 @@ export class AuthenticationService {
     this.eventEmitter.emit(Events.InvalidateSessions, user?.email);
     this.eventEmitter.emit(Events.UserLogin, token, user?.email);
 
-    if (user?.deactivated) {
+    if (user?.deactivated || user?.delete) {
       await this.userService.updateOnePartialAsync(
         { _id: user?._id },
-        { deactivated: false },
+        { deactivated: false, delete: false },
       );
       const message = { userId: user?._id };
       this.kafkaClient.emit(
