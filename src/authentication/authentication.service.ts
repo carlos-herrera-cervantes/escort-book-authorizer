@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { HashingService } from '../hashing/hashing.service';
@@ -41,6 +42,9 @@ export class AuthenticationService {
 
   async validateUserAsync(email: string, password: string) {
     const user = await this.userService.getOneAsync({ email });
+
+    if (!user) throw new NotFoundException();
+
     const validPassword = await this.hashingService.compareAsync(
       password,
       user.password,
