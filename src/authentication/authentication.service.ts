@@ -155,6 +155,10 @@ export class AuthenticationService {
       throw new ForbiddenException('Invalid customer');
     }
 
+    if (user.verified) {
+      throw new BadRequestException('Account is already verified');
+    }
+
     this.jwtService.verifyAsync(verificationToken).catch(() => {
       throw new BadRequestException('The verification token is not valid');
     });
@@ -162,6 +166,8 @@ export class AuthenticationService {
     const filter = { verificationToken };
     const changes = { verified: true };
     await this.userService.updateOnePartialAsync(filter, changes);
+
+    this.kafkaClient.emit(KafkaTopics.PAYMENT_METHOD_CHANGES, JSON.stringify(user));
   }
 
   private async emitEmailMessage(emailConfig: EmailConfigDto) {
