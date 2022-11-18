@@ -9,13 +9,11 @@ async function bootstrap() {
     cors: true,
   });
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      transformOptions: { enableImplicitConversion: true },
-      exceptionFactory: transformErrors,
-    }),
-  );
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true,
+    transformOptions: { enableImplicitConversion: true },
+    exceptionFactory: transformErrors,
+  }));
 
   await app.listen(3000);
 }

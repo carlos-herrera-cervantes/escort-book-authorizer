@@ -14,10 +14,16 @@ import { CreateUserDto } from '../user/dto/create-user.dto';
 import { Role } from '../user/enums/roles.enum';
 import { MessageResponseDto } from '../common/dto/message-response.dto';
 import { UserTypes } from '../user/enums/types.enum';
-import { ConfigService } from '@nestjs/config';
 import { ClientKafka } from '@nestjs/microservices';
 import { KafkaTopics } from '../common/enums/topics.enum';
 import { EmailConfigDto } from './dto/email-config.dto';
+import { APP_HOST } from '../common/enums/app.enum';
+import {
+  WELCOME_USER_TEMPLATE,
+  WELCOME_USER_SUBJECT,
+  WELCOME_CUSTOMER_TEMPLATE,
+  WELCOME_CUSTOMER_SUBJECT,
+} from '../common/enums/templates.enum';
 import '../common/extensions/string.extension';
 
 @Injectable()
@@ -33,9 +39,6 @@ export class AuthenticationService {
 
   @Inject(EventEmitter2)
   private readonly eventEmitter: EventEmitter2;
-
-  @Inject(ConfigService)
-  private readonly configService: ConfigService;
 
   @Inject('EscortBook')
   private readonly kafkaClient: ClientKafka;
@@ -63,33 +66,36 @@ export class AuthenticationService {
   }
 
   async loginAsync(user: any): Promise<string> {
-    const blockUser =
+    const lockedUser =
       user?.block &&
       (user?.type == UserTypes.Customer || user?.type == UserTypes.Escort);
 
-    if (blockUser) throw new ForbiddenException();
+    if (lockedUser) throw new ForbiddenException();
 
-    const payload = {
+    const token = await this.jwtService.signAsync({
       email: user?.email,
       roles: user?.roles,
       id: user?._id,
       type: user?.type,
       firebaseToken: user?.firebaseToken ?? '',
-    };
-    const token = await this.jwtService.signAsync(payload);
+    });
 
     this.eventEmitter.emit(Events.InvalidateSessions, user?.email);
-    this.eventEmitter.emit(Events.UserLogin, token, user?.email);
+    this.eventEmitter.emit(Events.UserLogin, {
+      token,
+      user: user?.email,
+      userId: user?._id,
+    });
 
     if (user?.deactivated || user?.delete) {
-      await this.userService.updateOnePartialAsync(
-        { _id: user?._id },
-        { deactivated: false, delete: false },
-      );
-      const message = { userId: user?._id };
+      await this.userService.updateOnePartialAsync({
+        _id: user?._id
+      }, {
+        deactivated: false, delete: false
+      });
       this.kafkaClient.emit(
         KafkaTopics.USER_ACTIVE_ACCOUNT,
-        JSON.stringify(message),
+        JSON.stringify({ userId: user?._id }),
       );
     }
 
@@ -109,12 +115,11 @@ export class AuthenticationService {
     }
 
     const created = await this.userService.createAsync(user);
-    const host = this.configService.get<string>('HOST');
     const config = {
       user: created,
-      verificationEndpoint: `${host}/api/v1/authentication/verification/users`,
-      templateUrl: this.configService.get<string>('WELCOME_USER_TEMPLATE'),
-      subject: this.configService.get<string>('WELCOME_USER_SUBJECT'),
+      verificationEndpoint: `${APP_HOST}/api/v1/authentication/verification/users`,
+      templateUrl: WELCOME_USER_TEMPLATE,
+      subject: WELCOME_USER_SUBJECT,
     };
 
     await this.emitEmailMessage(config);
@@ -135,12 +140,11 @@ export class AuthenticationService {
     user.type = userType;
 
     const created = await this.userService.createAsync(user);
-    const host = this.configService.get<string>('HOST');
     const config = {
       user: created,
-      verificationEndpoint: `${host}/api/v1/authentication/verification/customer`,
-      templateUrl: this.configService.get<string>('WELCOME_CUSTOMER_TEMPLATE'),
-      subject: this.configService.get<string>('WELCOME_CUSTOMER_SUBJECT'),
+      verificationEndpoint: `${APP_HOST}/api/v1/authentication/verification/customer`,
+      templateUrl: WELCOME_CUSTOMER_TEMPLATE,
+      subject: WELCOME_CUSTOMER_SUBJECT,
     };
 
     await this.emitEmailMessage(config);
