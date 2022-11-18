@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Events } from '../../common/enums/events.enum';
 import { AccessTokenService } from '../access-token.service';
+import { CreateAccessTokenDto } from '../dto/create-access-token.dto';
 
 @Injectable()
 export class UserAuthenticationListener {
@@ -9,8 +10,8 @@ export class UserAuthenticationListener {
   private readonly accessTokenService: AccessTokenService;
 
   @OnEvent(Events.UserLogin, { async: true })
-  async handleUserLogin(token: string, user: string): Promise<void> {
-    await this.accessTokenService.createAsync({ token, user });
+  async handleUserLogin(accessToken: CreateAccessTokenDto): Promise<void> {
+    await this.accessTokenService.createAsync(accessToken);
   }
 
   @OnEvent(Events.UserLogout, { async: true })

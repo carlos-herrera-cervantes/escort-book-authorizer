@@ -31,11 +31,11 @@ export class User {
   @Prop()
   firebaseToken: string;
 
-  @Prop({ default: new Date().toUTCString() })
+  @Prop()
   createdAt: Date;
 
-  @Prop({ default: new Date().toUTCString() })
-  updateAt: Date;
+  @Prop()
+  updatedAt: Date;
 
   @Prop({ default: false })
   block: boolean;
@@ -53,7 +53,10 @@ UserSchema.pre<UserDocument>('save', async function () {
   const hashingService = new HashingService();
 
   if (!this.isNew) {
-    this.updateAt = new Date();
+    this.updatedAt = new Date();
+  } else {
+    this.updatedAt = new Date();
+    this.createdAt = new Date();
   }
 
   if (this.password) {

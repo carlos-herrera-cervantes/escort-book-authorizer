@@ -19,10 +19,9 @@ export class UserController {
     @Req() req: any,
     @Body() user: UpdateUserDto,
   ): Promise<MessageResponseDto> {
-    await this.userService.updateOnePartialAsync(
-      { email: req.body.user.email },
-      user,
-    );
+    await this.userService.updateOnePartialAsync({
+      email: req.body.user.email
+    }, user);
     return { message: 'OK' };
   }
 }

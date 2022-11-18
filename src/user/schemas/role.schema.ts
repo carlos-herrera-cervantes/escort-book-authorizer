@@ -16,11 +16,21 @@ export class Role {
   @Prop()
   active: boolean;
 
-  @Prop({ default: new Date().toUTCString() })
+  @Prop()
   createdAt: Date;
 
-  @Prop({ default: new Date().toUTCString() })
-  updateAt: Date;
+  @Prop()
+  updatedAt: Date;
 }
 
 export const RoleSchema = SchemaFactory.createForClass(Role);
+
+RoleSchema.pre<RoleDocument>('save', function () {
+  if (this.isNew) {
+    this.createdAt = new Date();
+    this.updatedAt = new Date();
+    return;
+  }
+
+  this.updatedAt = new Date();
+});

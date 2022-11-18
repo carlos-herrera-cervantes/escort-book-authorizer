@@ -30,11 +30,7 @@ export class UserService {
     filter: FilterQuery<UserDocument>,
     user: UpdateUserDto,
   ): Promise<User> {
-    return this.userModel.findOneAndUpdate(
-      filter,
-      { $set: user },
-      { new: true },
-    );
+    return this.userModel.findOneAndUpdate(filter, { $set: user }, { new: true });
   }
 
   async deleteOneAsync(filter: FilterQuery<UserDocument>): Promise<void> {

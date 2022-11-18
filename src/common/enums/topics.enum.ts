@@ -6,3 +6,5 @@ export enum KafkaTopics {
   SEND_EMAIL = 'send-email',
   PAYMENT_METHOD_CHANGES = 'escort-book-payment-method-changes',
 }
+
+export const KAFKA_BROKERS = process.env.BROKERS;
