@@ -66,11 +66,9 @@ export class AuthenticationService {
   }
 
   async loginAsync(user: any): Promise<string> {
-    const lockedUser =
-      user?.block &&
-      (user?.type == UserTypes.Customer || user?.type == UserTypes.Escort);
+    const userBlocked = user?.block && (user?.type == UserTypes.Customer || user?.type == UserTypes.Escort);
 
-    if (lockedUser) throw new ForbiddenException();
+    if (userBlocked) throw new ForbiddenException();
 
     const token = await this.jwtService.signAsync({
       email: user?.email,
@@ -88,15 +86,8 @@ export class AuthenticationService {
     });
 
     if (user?.deactivated || user?.delete) {
-      await this.userService.updateOnePartialAsync({
-        _id: user?._id
-      }, {
-        deactivated: false, delete: false
-      });
-      this.kafkaClient.emit(
-        KafkaTopics.USER_ACTIVE_ACCOUNT,
-        JSON.stringify({ userId: user?._id }),
-      );
+      await this.userService.updateOnePartialAsync({ _id: user?._id }, { deactivated: false, delete: false });
+      this.kafkaClient.emit(KafkaTopics.USER_ACTIVE_ACCOUNT, JSON.stringify({ userId: user?._id }));
     }
 
     return token;
@@ -127,10 +118,7 @@ export class AuthenticationService {
     return { message: 'A verification email was sent to the employee' };
   }
 
-  async signUpCustomerAsync(
-    user: CreateUserDto,
-    userType: UserTypes,
-  ): Promise<MessageResponseDto> {
+  async signUpCustomerAsync(user: CreateUserDto, userType: UserTypes): Promise<MessageResponseDto> {
     const verificationToken = await this.jwtService.signAsync({
       user: user.email,
     });

@@ -8,7 +8,7 @@ export type UserDocument = User & Document;
 
 @Schema({ versionKey: false })
 export class User {
-  id: string;
+  _id: string;
 
   @Prop({ required: true })
   email: string;
