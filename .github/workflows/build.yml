@@ -2,6 +2,12 @@ name: Run unit test
 
 on: [push]
 
+env:
+  VERIFICATION_CUSTOMER_TEMPLATE: https://d75d-187-252-109-23.ngrok.io/escort-book-statics/successful-customer-verification.html
+  VERIFICATION_USER_TEMPLATE: https://d75d-187-252-109-23.ngrok.io/escort-book-statics/sucessful-user-verification.html
+  WELCOME_CUSTOMER_TEMPLATE: https://d75d-187-252-109-23.ngrok.io/escort-book-statics/welcome-customer.html
+  WELCOME_USER_TEMPLATE: https://d75d-187-252-109-23.ngrok.io/escort-book-statics/welcome-user.html
+
 jobs:
   build:
 
@@ -18,3 +24,7 @@ jobs:
       - run: npm ci
       - run: npm run build --if-present
       - run: npm run test
+
+      - name: Run integration tests
+        run: |
+          docker-compose up --abort-on-container-exit --exit-code-from test

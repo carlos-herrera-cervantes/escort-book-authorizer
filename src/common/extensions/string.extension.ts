@@ -1,7 +1,5 @@
 import * as http from 'https';
 
-export {};
-
 declare global {
   interface String {
     readHtml(): Promise<string>;
@@ -11,18 +9,17 @@ declare global {
 String.prototype.readHtml = async function (): Promise<string> {
   const self = this as string;
 
-  const html =
-    (await new Promise((resolve, reject) => {
-      const request = http.get(self, (response) => {
-        let data = '';
+  const html = (await new Promise((resolve, reject) => {
+    const request = http.get(self, (response) => {
+      let data = '';
 
-        response.on('data', (chunk) => (data += chunk));
-        response.on('end', () => resolve(data));
-      });
+      response.on('data', (chunk) => (data += chunk));
+      response.on('end', () => resolve(data));
+    });
 
-      request.on('error', (error) => reject(error));
-      request.end();
-    }).catch(() => console.error('ERROR GETTING HTML'))) ?? '';
+    request.on('error', (error) => reject(error));
+    request.end();
+  }).catch(() => console.error('ERROR GETTING HTML'))) ?? '';
 
   return html as string;
 };

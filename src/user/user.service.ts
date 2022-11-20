@@ -14,8 +14,12 @@ export class UserService {
   @InjectModel(Role.name)
   private readonly roleModel: Model<RoleDocument>;
 
-  async getOneAsync(filter: FilterQuery<UserDocument>): Promise<User> {
+  async getOneAsync(filter?: FilterQuery<UserDocument>): Promise<User> {
     return this.userModel.findOne(filter).lean();
+  }
+
+  async count(filter?: FilterQuery<UserDocument>): Promise<number> {
+    return this.userModel.countDocuments(filter);
   }
 
   async getRoles(): Promise<Role[]> {
@@ -26,14 +30,11 @@ export class UserService {
     return this.userModel.create(user);
   }
 
-  async updateOnePartialAsync(
-    filter: FilterQuery<UserDocument>,
-    user: UpdateUserDto,
-  ): Promise<User> {
+  async updateOnePartialAsync(filter: FilterQuery<UserDocument>, user: UpdateUserDto): Promise<User> {
     return this.userModel.findOneAndUpdate(filter, { $set: user }, { new: true });
   }
 
-  async deleteOneAsync(filter: FilterQuery<UserDocument>): Promise<void> {
+  async deleteOneAsync(filter?: FilterQuery<UserDocument>): Promise<void> {
     await this.userModel.findOneAndDelete(filter);
   }
 }

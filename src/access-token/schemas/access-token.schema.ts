@@ -5,7 +5,7 @@ export type AccessTokenDocument = AccessToken & Document;
 
 @Schema({ versionKey: false })
 export class AccessToken {
-  id: string;
+  _id: string;
 
   @Prop({ type: Types.ObjectId })
   userId: Types.ObjectId;
