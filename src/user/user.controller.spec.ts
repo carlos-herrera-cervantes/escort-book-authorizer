@@ -42,9 +42,7 @@ describe('UserController', () => {
       .spyOn(userService, 'updateOnePartialAsync')
       .mockImplementation(() => Promise.resolve(new User()));
 
-    const firebaseTokenResult = await userController.setFirebaseToken({
-      body: { user: {} },
-    }, new UpdateUserDto());
+    const firebaseTokenResult = await userController.setFirebaseToken("bad@example.com", new UpdateUserDto());
     
     expect(firebaseTokenResult.message).toEqual('OK');
     expect(mockUserServiceUpdateOnePartialAsync).toBeCalledTimes(1);

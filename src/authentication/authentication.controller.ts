@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   HttpCode,
   HttpStatus,
   Inject,
@@ -16,7 +17,6 @@ import { CreateUserDto } from '../user/dto/create-user.dto';
 import { AuthenticationService } from './authentication.service';
 import { JwtResponseDto } from './dto/jwt-response.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
-import { RevokeJwtGuard } from '../access-token/guards/revoke-jwt.guard';
 import { Response } from 'express';
 import { UserTypes } from '../user/enums/types.enum';
 import {
@@ -59,10 +59,9 @@ export class AuthenticationController {
   }
 
   @Post('logout')
-  @UseGuards(RevokeJwtGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  logoutAsync(@Req() req: any): void {
-    this.authenticationService.logoutAsync(req?.body?.user?.email);
+  logoutAsync(@Headers('user-email') userEmail: string): void {
+    this.authenticationService.logoutAsync(userEmail);
   }
 
   @Post('/customers/sign-up')
