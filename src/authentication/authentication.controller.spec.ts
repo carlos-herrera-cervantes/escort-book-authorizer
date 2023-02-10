@@ -78,7 +78,7 @@ describe('AuthenticationController', () => {
       .spyOn(authenticationService, 'logoutAsync')
       .mockImplementation(() => Promise.resolve());
 
-    await authenticationController.logoutAsync({});
+    await authenticationController.logoutAsync("bad@example.com");
 
     expect(mockAuthenticationServiceLogoutAsync).toBeCalledTimes(1);
   });
